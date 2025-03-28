@@ -1,13 +1,24 @@
 
-import React from 'react';
+import React, { useState } from 'react';
+import { useTheme } from 'next-themes';
 import Sidebar from '@/components/sidebar/Sidebar';
 import FlowWorkspace from '@/components/FlowWorkspace';
+import DAppsPanel from '@/components/DAppsPanel';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
+import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
+import { Sun, Moon } from 'lucide-react';
 
 const Dashboard = () => {
+  const [activeTab, setActiveTab] = useState('flowchart');
+  const { theme, setTheme } = useTheme();
+
+  const toggleTheme = () => {
+    setTheme(theme === 'dark' ? 'light' : 'dark');
+  };
+
   return (
     <div className="h-screen flex overflow-hidden bg-flow-bg text-white">
       <div className="w-64 flex-shrink-0">
@@ -23,6 +34,14 @@ const Dashboard = () => {
           </div>
           
           <div className="flex items-center space-x-4">
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              onClick={toggleTheme}
+              className="rounded-full h-8 w-8"
+            >
+              {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
+            </Button>
             <div className="w-8 h-8 rounded-full bg-flow-node-ai flex items-center justify-center">
               <span className="text-xs font-bold">3</span>
             </div>
@@ -38,14 +57,23 @@ const Dashboard = () => {
         
         {/* Main content */}
         <main className="flex-1 overflow-hidden p-6">
-          <Tabs defaultValue="flowchart" className="h-full flex flex-col">
+          <Tabs defaultValue="flowchart" className="h-full flex flex-col" value={activeTab} onValueChange={setActiveTab}>
             <div className="flex justify-between items-center mb-4">
               <TabsList className="bg-flow-card/40">
                 <TabsTrigger value="flowchart" className="data-[state=active]:bg-flow-node-blockchain data-[state=active]:text-white">
                   Flowchart
                 </TabsTrigger>
-                <TabsTrigger value="analytics" className="data-[state=active]:bg-flow-node-ai data-[state=active]:text-white">
-                  Analytics
+                <TabsTrigger value="ai-agents" className="data-[state=active]:bg-flow-node-ai data-[state=active]:text-white">
+                  AI Agents
+                </TabsTrigger>
+                <TabsTrigger value="blockchain" className="data-[state=active]:bg-flow-node-blockchain data-[state=active]:text-white">
+                  Blockchain
+                </TabsTrigger>
+                <TabsTrigger value="templates" className="data-[state=active]:bg-flow-accent data-[state=active]:text-white">
+                  Templates
+                </TabsTrigger>
+                <TabsTrigger value="history" className="data-[state=active]:bg-flow-accent data-[state=active]:text-white">
+                  History
                 </TabsTrigger>
                 <TabsTrigger value="settings" className="data-[state=active]:bg-flow-accent data-[state=active]:text-white">
                   Settings
@@ -63,150 +91,248 @@ const Dashboard = () => {
                   <FlowWorkspace />
                 </div>
                 
-                <div className="space-y-4">
-                  <motion.div
-                    initial={{ opacity: 0, x: 20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ duration: 0.5 }}
-                  >
-                    <Card className="bg-flow-card/40 border-gray-700">
-                      <CardHeader className="pb-2">
-                        <CardTitle className="text-base">Node Properties</CardTitle>
-                        <CardDescription className="text-gray-400">Configure selected node</CardDescription>
-                      </CardHeader>
-                      <CardContent className="text-sm">
-                        <p className="text-gray-300">Select a node to view and edit its properties</p>
-                      </CardContent>
-                    </Card>
-                  </motion.div>
-                  
-                  <motion.div
-                    initial={{ opacity: 0, x: 20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ duration: 0.5, delay: 0.1 }}
-                  >
-                    <Card className="bg-flow-card/40 border-gray-700">
-                      <CardHeader className="pb-2">
-                        <CardTitle className="text-base">Available Nodes</CardTitle>
-                        <CardDescription className="text-gray-400">Drag & drop to canvas</CardDescription>
-                      </CardHeader>
-                      <CardContent>
-                        <div className="space-y-2">
-                          <div className="p-2 bg-flow-card/60 rounded cursor-move flex items-center">
-                            <div className="w-6 h-6 rounded-full bg-flow-node-blockchain/30 flex items-center justify-center mr-2">
-                              <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-flow-node-blockchain">
-                                <rect width="18" height="18" x="3" y="3" rx="2" ry="2"></rect>
-                                <path d="M12 8v8"></path>
-                              </svg>
-                            </div>
-                            <span className="text-sm">Blockchain Node</span>
-                          </div>
-                          
-                          <div className="p-2 bg-flow-card/60 rounded cursor-move flex items-center">
-                            <div className="w-6 h-6 rounded-full bg-flow-node-ai/30 flex items-center justify-center mr-2">
-                              <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-flow-node-ai">
-                                <path d="M12 2a4 4 0 0 1 4 4"></path>
-                                <path d="M10 9a6 6 0 0 0-6 6"></path>
-                              </svg>
-                            </div>
-                            <span className="text-sm">AI Agent Node</span>
-                          </div>
-                          
-                          <div className="p-2 bg-flow-card/60 rounded cursor-move flex items-center">
-                            <div className="w-6 h-6 rounded-full bg-flow-accent/30 flex items-center justify-center mr-2">
-                              <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-flow-accent">
-                                <path d="M12 5v14"></path>
-                                <path d="M18 13a3 3 0 1 0 0-2"></path>
-                              </svg>
-                            </div>
-                            <span className="text-sm">Process Node</span>
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  </motion.div>
-                  
-                  <motion.div
-                    initial={{ opacity: 0, x: 20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ duration: 0.5, delay: 0.2 }}
-                  >
-                    <Card className="bg-flow-card/40 border-gray-700">
-                      <CardHeader className="pb-2">
-                        <CardTitle className="text-base">Workflow Info</CardTitle>
-                        <CardDescription className="text-gray-400">Current status</CardDescription>
-                      </CardHeader>
-                      <CardContent>
-                        <div className="space-y-2 text-sm">
-                          <div className="flex justify-between">
-                            <span className="text-gray-400">Status:</span>
-                            <span className="text-flow-success">Ready</span>
-                          </div>
-                          <div className="flex justify-between">
-                            <span className="text-gray-400">Nodes:</span>
-                            <span>4</span>
-                          </div>
-                          <div className="flex justify-between">
-                            <span className="text-gray-400">Connections:</span>
-                            <span>3</span>
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  </motion.div>
-                </div>
+                <DAppsPanel />
               </div>
             </TabsContent>
             
-            <TabsContent value="analytics" className="h-full overflow-auto mt-0">
-              <div className="grid grid-cols-2 gap-4">
+            <TabsContent value="ai-agents" className="h-full overflow-auto mt-0">
+              <div className="grid grid-cols-1 gap-4">
                 <Card className="bg-flow-card/40 border-gray-700">
                   <CardHeader>
-                    <CardTitle>Performance Analytics</CardTitle>
-                    <CardDescription className="text-gray-400">Network throughput and response times</CardDescription>
+                    <CardTitle>AI Agents</CardTitle>
+                    <CardDescription className="text-gray-400">Manage and configure AI agents</CardDescription>
                   </CardHeader>
                   <CardContent>
-                    <div className="h-64 flex items-center justify-center text-gray-400">
-                      Analytics chart placeholder
-                    </div>
-                  </CardContent>
-                </Card>
-                
-                <Card className="bg-flow-card/40 border-gray-700">
-                  <CardHeader>
-                    <CardTitle>Resource Usage</CardTitle>
-                    <CardDescription className="text-gray-400">CPU, memory, and network utilization</CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="h-64 flex items-center justify-center text-gray-400">
-                      Resource usage chart placeholder
+                    <div className="space-y-4">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {[
+                          { name: "Natural Language Processor", description: "Process and understand text input" },
+                          { name: "Data Analyzer", description: "Analyze blockchain data patterns" },
+                          { name: "Smart Contract Generator", description: "Generate smart contract code" },
+                          { name: "Transaction Validator", description: "Validate transaction integrity" }
+                        ].map((agent, index) => (
+                          <Card key={index} className="bg-flow-card/60 border-gray-700">
+                            <CardHeader className="pb-2">
+                              <CardTitle className="text-base flex items-center">
+                                <svg className="mr-2 h-5 w-5 text-flow-node-ai" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                  <path d="M12 2a4 4 0 0 1 4 4c0 1.95-.76 3.54-1.89 4.48A4 4 0 0 1 12 14a4 4 0 0 1-2.11-3.52C8.76 9.54 8 7.95 8 6a4 4 0 0 1 4-4Z"></path>
+                                  <path d="M10 9a6 6 0 0 0-6 6c0 1.86.5 3.48 1.38 4.82a22.5 22.5 0 0 0 5.31 5.18c.4.28.8.51 1.19.69a1.9 1.9 0 0 0 2.24 0c.39-.18.79-.41 1.19-.69a22.5 22.5 0 0 0 5.31-5.18A10.43 10.43 0 0 0 22 15a6 6 0 0 0-6-6"></path>
+                                </svg>
+                                {agent.name}
+                              </CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                              <p className="text-sm text-gray-400">{agent.description}</p>
+                              <div className="mt-4">
+                                <Button variant="outline" size="sm" className="bg-flow-card/40 border-gray-700 text-white">
+                                  Configure
+                                </Button>
+                              </div>
+                            </CardContent>
+                          </Card>
+                        ))}
+                      </div>
                     </div>
                   </CardContent>
                 </Card>
               </div>
+            </TabsContent>
+            
+            <TabsContent value="blockchain" className="h-full overflow-auto mt-0">
+              <div className="grid grid-cols-1 gap-4">
+                <Card className="bg-flow-card/40 border-gray-700">
+                  <CardHeader>
+                    <CardTitle>Blockchain Networks</CardTitle>
+                    <CardDescription className="text-gray-400">Manage blockchain connections and assets</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-4">
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        {[
+                          { name: "Ethereum", icon: "🔷", status: "Connected" },
+                          { name: "Polygon", icon: "🟣", status: "Connected" },
+                          { name: "Arbitrum", icon: "🔵", status: "Not Connected" },
+                          { name: "Optimism", icon: "🔴", status: "Not Connected" },
+                          { name: "Solana", icon: "🟡", status: "Not Connected" },
+                          { name: "Avalanche", icon: "🔺", status: "Not Connected" }
+                        ].map((network, index) => (
+                          <Card key={index} className="bg-flow-card/60 border-gray-700">
+                            <CardHeader className="pb-2">
+                              <CardTitle className="text-base flex items-center">
+                                <span className="mr-2">{network.icon}</span>
+                                {network.name}
+                              </CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                              <div className="flex justify-between items-center">
+                                <span className={`text-sm ${network.status === "Connected" ? "text-green-500" : "text-gray-400"}`}>
+                                  {network.status}
+                                </span>
+                                <Button variant="outline" size="sm" className="bg-flow-card/40 border-gray-700 text-white">
+                                  {network.status === "Connected" ? "Disconnect" : "Connect"}
+                                </Button>
+                              </div>
+                            </CardContent>
+                          </Card>
+                        ))}
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+            </TabsContent>
+            
+            <TabsContent value="templates" className="h-full overflow-auto mt-0">
+              <div className="grid grid-cols-1 gap-4">
+                <Card className="bg-flow-card/40 border-gray-700">
+                  <CardHeader>
+                    <CardTitle>Workflow Templates</CardTitle>
+                    <CardDescription className="text-gray-400">Pre-built workflows for common scenarios</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-4">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {[
+                          { name: "Token Swap", description: "Connect to DEX and swap tokens automatically" },
+                          { name: "NFT Minting", description: "Generate and mint NFTs with metadata" },
+                          { name: "DAO Voting", description: "Create and process DAO governance votes" },
+                          { name: "DeFi Yield Farming", description: "Automate yield farming across protocols" }
+                        ].map((template, index) => (
+                          <Card key={index} className="bg-flow-card/60 border-gray-700">
+                            <CardHeader className="pb-2">
+                              <CardTitle className="text-base">{template.name}</CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                              <p className="text-sm text-gray-400">{template.description}</p>
+                              <div className="mt-4">
+                                <Button className="bg-flow-node-blockchain text-white hover:bg-flow-node-blockchain/90 mr-2" size="sm">
+                                  Use Template
+                                </Button>
+                                <Button variant="outline" size="sm" className="bg-flow-card/40 border-gray-700 text-white">
+                                  Preview
+                                </Button>
+                              </div>
+                            </CardContent>
+                          </Card>
+                        ))}
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+            </TabsContent>
+            
+            <TabsContent value="history" className="h-full overflow-auto mt-0">
+              <Card className="bg-flow-card/40 border-gray-700">
+                <CardHeader>
+                  <CardTitle>Workflow History</CardTitle>
+                  <CardDescription className="text-gray-400">Recent workflow executions and results</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    {[
+                      { name: "Token Swap Workflow", date: "2023-06-15 14:30", status: "Completed", result: "Success" },
+                      { name: "NFT Generation", date: "2023-06-14 09:45", status: "Completed", result: "Success" },
+                      { name: "Data Analysis", date: "2023-06-13 16:20", status: "Completed", result: "Warning" },
+                      { name: "Smart Contract Deployment", date: "2023-06-12 11:10", status: "Failed", result: "Error" }
+                    ].map((history, index) => (
+                      <div key={index} className="flex items-center justify-between p-3 bg-flow-card/60 rounded-md border border-gray-700">
+                        <div>
+                          <h3 className="font-medium">{history.name}</h3>
+                          <p className="text-sm text-gray-400">{history.date}</p>
+                        </div>
+                        <div className="flex items-center">
+                          <span className={`px-2 py-1 rounded text-xs mr-2 ${
+                            history.result === "Success" ? "bg-green-900/30 text-green-500" :
+                            history.result === "Warning" ? "bg-yellow-900/30 text-yellow-500" :
+                            "bg-red-900/30 text-red-500"
+                          }`}>
+                            {history.result}
+                          </span>
+                          <Button variant="outline" size="sm" className="bg-flow-card/40 border-gray-700 text-white">
+                            View Details
+                          </Button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
             </TabsContent>
             
             <TabsContent value="settings" className="h-full overflow-auto mt-0">
               <Card className="bg-flow-card/40 border-gray-700">
                 <CardHeader>
-                  <CardTitle>Workflow Settings</CardTitle>
-                  <CardDescription className="text-gray-400">Configure your workflow properties</CardDescription>
+                  <CardTitle>Application Settings</CardTitle>
+                  <CardDescription className="text-gray-400">Configure your workflow settings</CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <div className="space-y-4">
+                  <div className="space-y-6">
                     <div>
-                      <h3 className="font-medium mb-2">General Settings</h3>
-                      <p className="text-sm text-gray-400">Configure your workflow's general settings</p>
+                      <h3 className="font-medium mb-2">Theme</h3>
+                      <div className="flex items-center space-x-4">
+                        <Button 
+                          variant={theme === 'light' ? "default" : "outline"} 
+                          className={theme === 'light' ? "bg-flow-node-blockchain text-white" : "bg-flow-card/40 border-gray-700 text-white"}
+                          onClick={() => setTheme('light')}
+                        >
+                          <Sun className="mr-2 h-4 w-4" />
+                          Light Mode
+                        </Button>
+                        <Button 
+                          variant={theme === 'dark' ? "default" : "outline"} 
+                          className={theme === 'dark' ? "bg-flow-node-blockchain text-white" : "bg-flow-card/40 border-gray-700 text-white"}
+                          onClick={() => setTheme('dark')}
+                        >
+                          <Moon className="mr-2 h-4 w-4" />
+                          Dark Mode
+                        </Button>
+                      </div>
                     </div>
                     
+                    <Separator className="bg-gray-700" />
+                    
                     <div>
-                      <h3 className="font-medium mb-2">Blockchain Connection</h3>
-                      <p className="text-sm text-gray-400">Set up connection to blockchain networks</p>
+                      <h3 className="font-medium mb-2">Wallet Connection</h3>
+                      <Button className="bg-flow-node-blockchain text-white hover:bg-flow-node-blockchain/90">
+                        Connect Wallet
+                      </Button>
                     </div>
+                    
+                    <Separator className="bg-gray-700" />
                     
                     <div>
                       <h3 className="font-medium mb-2">AI Agent Configuration</h3>
-                      <p className="text-sm text-gray-400">Configure AI agent properties and capabilities</p>
+                      <div className="space-y-2">
+                        <div className="flex justify-between items-center">
+                          <span>Enable AI suggestions</span>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex justify-between items-center">
+                          <span>Real-time analysis</span>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex justify-between items-center">
+                          <span>Share anonymous data to improve AI</span>
+                          <Switch />
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <Separator className="bg-gray-700" />
+                    
+                    <div>
+                      <h3 className="font-medium mb-2">Network Settings</h3>
+                      <div className="space-y-2">
+                        <div className="flex justify-between items-center">
+                          <span>Auto-detect network</span>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex justify-between items-center">
+                          <span>Testnet mode</span>
+                          <Switch />
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </CardContent>

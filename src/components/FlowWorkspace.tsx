@@ -1,15 +1,25 @@
 
 import React, { useState, useEffect, useRef } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import FlowNode from './FlowNode';
 import FlowConnectionLine from './FlowConnectionLine';
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
-import { motion } from "framer-motion";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Switch } from "@/components/ui/switch";
+import { Textarea } from "@/components/ui/textarea";
+import { Wallet, CheckCircle2, PlayCircle } from 'lucide-react';
 
 const FlowWorkspace: React.FC = () => {
   const containerRef = useRef<HTMLDivElement>(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const [activeNodeId, setActiveNodeId] = useState<string | null>(null);
+  const [workspaceMode, setWorkspaceMode] = useState<'manual' | 'ai'>('manual');
+  const [showWalletDialog, setShowWalletDialog] = useState(false);
+  const [showSignatureDialog, setShowSignatureDialog] = useState(false);
+  const [naturalLanguagePrompt, setNaturalLanguagePrompt] = useState('');
+  const [isFlowGenerating, setIsFlowGenerating] = useState(false);
+  const [isValidated, setIsValidated] = useState(false);
   const { toast } = useToast();
 
   const [nodes, setNodes] = useState([
@@ -51,6 +61,55 @@ const FlowWorkspace: React.FC = () => {
     }
   ]);
 
+  // Sample AI-generated nodes (used when in AI mode)
+  const aiGeneratedNodes = [
+    {
+      id: 'ai-gen-1',
+      type: 'blockchain' as const,
+      label: 'Ethereum',
+      description: 'Contract Deploy',
+      position: { x: 150, y: 150 },
+      isAnimated: false,
+      connections: ['ai-gen-2']
+    },
+    {
+      id: 'ai-gen-2',
+      type: 'ai' as const,
+      label: 'Language Parser',
+      description: 'Parse & Analyze',
+      position: { x: 350, y: 250 },
+      isAnimated: false,
+      connections: ['ai-gen-3']
+    },
+    {
+      id: 'ai-gen-3',
+      type: 'ai' as const,
+      label: 'Data Validator',
+      description: 'Validate Data',
+      position: { x: 550, y: 150 },
+      isAnimated: false,
+      connections: ['ai-gen-4']
+    },
+    {
+      id: 'ai-gen-4',
+      type: 'blockchain' as const,
+      label: 'Arbitrum',
+      description: 'Transaction Execution',
+      position: { x: 750, y: 250 },
+      isAnimated: false,
+      connections: ['ai-gen-5']
+    },
+    {
+      id: 'ai-gen-5',
+      type: 'default' as const,
+      label: 'Result Handler',
+      description: 'Format Results',
+      position: { x: 950, y: 150 },
+      isAnimated: false,
+      connections: []
+    }
+  ];
+
   const handleNodeClick = (nodeId: string) => {
     setActiveNodeId(nodeId);
     toast({
@@ -60,6 +119,27 @@ const FlowWorkspace: React.FC = () => {
   };
 
   const runSimulation = () => {
+    setShowSignatureDialog(true);
+  };
+
+  const handleConnectWallet = () => {
+    setShowWalletDialog(false);
+    toast({
+      title: "Wallet Connected",
+      description: "Wallet has been connected successfully",
+    });
+  };
+
+  const handleSkipWallet = () => {
+    setShowWalletDialog(false);
+    toast({
+      title: "Wallet Connection Skipped",
+      description: "You can connect your wallet later in Settings",
+    });
+  };
+
+  const handleSignTransaction = () => {
+    setShowSignatureDialog(false);
     setIsProcessing(true);
     
     // Reset all animations
@@ -69,34 +149,18 @@ const FlowWorkspace: React.FC = () => {
     })));
     
     // Animate each node in sequence
+    const currentNodes = workspaceMode === 'ai' && isFlowGenerating ? aiGeneratedNodes : nodes;
+    
     const animateSequence = async () => {
-      // First node
-      setNodes(prev => prev.map(node => 
-        node.id === 'blockchain-1' ? { ...node, isAnimated: true } : node
-      ));
-      
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
-      // Second node
-      setNodes(prev => prev.map(node => 
-        node.id === 'ai-process-1' ? { ...node, isAnimated: true } : node
-      ));
-      
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
-      // Third node
-      setNodes(prev => prev.map(node => 
-        node.id === 'blockchain-2' ? { ...node, isAnimated: true } : node
-      ));
-      
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
-      // Output node
-      setNodes(prev => prev.map(node => 
-        node.id === 'output-node' ? { ...node, isAnimated: true } : node
-      ));
-      
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      for (let i = 0; i < currentNodes.length; i++) {
+        const nodeId = currentNodes[i].id;
+        
+        setNodes(prev => prev.map(node => 
+          node.id === nodeId ? { ...node, isAnimated: true } : node
+        ));
+        
+        await new Promise(resolve => setTimeout(resolve, 1000));
+      }
       
       // Success message
       toast({
@@ -110,24 +174,115 @@ const FlowWorkspace: React.FC = () => {
     animateSequence();
   };
 
+  const handleCancelTransaction = () => {
+    setShowSignatureDialog(false);
+    toast({
+      title: "Transaction Cancelled",
+      description: "The transaction signing was cancelled",
+    });
+  };
+
+  const toggleWorkspaceMode = () => {
+    if (workspaceMode === 'manual') {
+      setShowWalletDialog(true);
+      setWorkspaceMode('ai');
+      setIsFlowGenerating(false);
+    } else {
+      setWorkspaceMode('manual');
+      setIsFlowGenerating(false);
+      setIsValidated(false);
+    }
+  };
+
+  const generateAIFlow = () => {
+    if (!naturalLanguagePrompt.trim()) {
+      toast({
+        title: "Empty Prompt",
+        description: "Please enter a description of the workflow you want to create",
+      });
+      return;
+    }
+
+    setIsFlowGenerating(true);
+    setIsValidated(false);
+    
+    // Simulate AI flow generation with a delay
+    setTimeout(() => {
+      // Replace current nodes with AI generated nodes
+      setNodes(aiGeneratedNodes);
+      
+      toast({
+        title: "Flow Generated",
+        description: "The AI has generated a workflow based on your description",
+      });
+    }, 2000);
+  };
+
+  const validateFlow = () => {
+    setIsProcessing(true);
+    
+    setTimeout(() => {
+      setIsProcessing(false);
+      setIsValidated(true);
+      
+      toast({
+        title: "Validation Successful",
+        description: "The workflow has been validated and is ready to execute",
+      });
+    }, 1500);
+  };
+
   return (
     <div className="h-full relative flex flex-col" ref={containerRef}>
-      <div className="absolute top-4 right-4 z-10 flex space-x-3">
+      <div className="absolute top-4 right-4 z-10 flex space-x-3 items-center">
+        <div className="flex items-center space-x-2 bg-flow-card/40 p-2 rounded-md mr-2">
+          <span className="text-sm text-white">Manual</span>
+          <Switch 
+            checked={workspaceMode === 'ai'}
+            onCheckedChange={toggleWorkspaceMode}
+          />
+          <span className="text-sm text-white">AI</span>
+        </div>
+        
+        {workspaceMode === 'manual' && (
+          <Button 
+            variant="outline" 
+            className="bg-flow-card border-gray-700 text-white hover:bg-flow-card/90"
+            onClick={() => {
+              toast({
+                title: "Node Added",
+                description: "Added a new node to the workspace"
+              });
+            }}
+          >
+            Add Node
+          </Button>
+        )}
+        
         <Button 
-          variant="outline" 
-          className="bg-flow-card border-gray-700 text-white hover:bg-flow-card/90"
-          onClick={() => {
-            toast({
-              title: "New Node Added",
-              description: "Added a new AI node to the workspace"
-            });
-          }}
+          onClick={validateFlow}
+          disabled={isProcessing || (workspaceMode === 'ai' && !isFlowGenerating)}
+          className="bg-flow-node-blockchain text-white hover:bg-flow-node-blockchain/90"
         >
-          Add Node
+          {isProcessing ? (
+            <div className="flex items-center">
+              <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+              Validating...
+            </div>
+          ) : (
+            <div className="flex items-center">
+              <CheckCircle2 className="mr-2 h-4 w-4" />
+              Validate
+            </div>
+          )}
         </Button>
+        
         <Button 
           onClick={runSimulation}
-          disabled={isProcessing}
+          disabled={isProcessing || !isValidated}
           className="bg-flow-node-ai text-white hover:bg-flow-node-ai/90"
         >
           {isProcessing ? (
@@ -138,9 +293,40 @@ const FlowWorkspace: React.FC = () => {
               </svg>
               Processing...
             </div>
-          ) : "Run Simulation"}
+          ) : (
+            <div className="flex items-center">
+              <PlayCircle className="mr-2 h-4 w-4" />
+              Execute
+            </div>
+          )}
         </Button>
       </div>
+      
+      {/* AI Mode Prompt Input */}
+      {workspaceMode === 'ai' && (
+        <div className="absolute top-16 left-4 right-4 z-10">
+          <div className="bg-flow-card/40 p-4 rounded-md border border-gray-700">
+            <div className="flex flex-col space-y-2">
+              <label className="text-sm text-white">Enter your workflow description:</label>
+              <div className="flex space-x-2">
+                <Textarea 
+                  placeholder="Describe what you want the AI to create... (e.g., Create a workflow that connects Ethereum to Uniswap for token swaps, validates the transaction, and sends results to IPFS)"
+                  value={naturalLanguagePrompt}
+                  onChange={(e) => setNaturalLanguagePrompt(e.target.value)}
+                  className="bg-flow-bg text-white border-gray-700 focus-visible:ring-flow-node-ai"
+                  rows={2}
+                />
+                <Button 
+                  onClick={generateAIFlow}
+                  className="bg-flow-node-ai text-white hover:bg-flow-node-ai/90 whitespace-nowrap self-end"
+                >
+                  Generate Flow
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
       
       {/* Background grid */}
       <div className="absolute inset-0 bg-flow-bg">
@@ -179,11 +365,11 @@ const FlowWorkspace: React.FC = () => {
       </div>
       
       {/* Nodes */}
-      <div className="relative h-full w-full">
+      <div className="relative h-full w-full mt-28">
         {nodes.map(node => (
           <motion.div
             key={node.id}
-            initial={{ opacity: 0, scale: 0.8 }}
+            initial={isFlowGenerating ? { opacity: 0, scale: 0 } : { opacity: 1, scale: 1 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.5 }}
             className="absolute"
@@ -231,6 +417,68 @@ const FlowWorkspace: React.FC = () => {
           </motion.div>
         ))}
       </div>
+
+      {/* Wallet Connection Dialog */}
+      <Dialog open={showWalletDialog} onOpenChange={setShowWalletDialog}>
+        <DialogContent className="bg-flow-card text-white border-flow-node-blockchain/30 max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-lg">Connect Wallet</DialogTitle>
+            <DialogDescription className="text-gray-400">
+              Connect your wallet to create and execute workflows
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex flex-col space-y-4 pt-4">
+            <div className="flex justify-center">
+              <Wallet size={48} className="text-flow-node-blockchain mb-4" />
+            </div>
+            <Button 
+              onClick={handleConnectWallet} 
+              className="bg-flow-node-blockchain hover:bg-flow-node-blockchain/90"
+            >
+              Connect Wallet
+            </Button>
+            <Button 
+              variant="outline" 
+              onClick={handleSkipWallet} 
+              className="border-gray-700 hover:bg-flow-card/90"
+            >
+              Skip for Now
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Signature Request Dialog */}
+      <Dialog open={showSignatureDialog} onOpenChange={setShowSignatureDialog}>
+        <DialogContent className="bg-flow-card text-white border-flow-node-blockchain/30 max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-lg">Signature Request</DialogTitle>
+            <DialogDescription className="text-gray-400">
+              Please sign this message to authorize the execution
+            </DialogDescription>
+          </DialogHeader>
+          <div className="bg-flow-bg/50 p-4 rounded-md border border-gray-700 mt-4">
+            <p className="text-sm font-mono break-all">
+              Message: I authorize the execution of this workflow on {new Date().toISOString()}
+            </p>
+          </div>
+          <div className="flex space-x-4 pt-4">
+            <Button 
+              onClick={handleSignTransaction} 
+              className="bg-flow-node-blockchain hover:bg-flow-node-blockchain/90 flex-1"
+            >
+              Sign
+            </Button>
+            <Button 
+              variant="outline" 
+              onClick={handleCancelTransaction} 
+              className="border-gray-700 hover:bg-flow-card/90 flex-1"
+            >
+              Cancel
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
