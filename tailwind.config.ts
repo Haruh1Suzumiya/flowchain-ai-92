@@ -1,3 +1,4 @@
+
 import type { Config } from "tailwindcss";
 
 export default {
@@ -61,6 +62,20 @@ export default {
 					'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
+				},
+				// Custom blockchain theme colors
+				flow: {
+					bg: '#0F172A',
+					card: '#1E293B',
+					accent: '#3B82F6',
+					node: {
+						ai: '#8B5CF6',
+						blockchain: '#06B6D4',
+						default: '#3B82F6'
+					},
+					success: '#10B981',
+					warning: '#F59E0B',
+					error: '#EF4444'
 				}
 			},
 			borderRadius: {
@@ -84,11 +99,37 @@ export default {
 					to: {
 						height: '0'
 					}
+				},
+				'pulse-ring': {
+					'0%': { transform: 'scale(0.8)', opacity: '0' },
+					'50%': { opacity: '0.5' },
+					'100%': { transform: 'scale(1.5)', opacity: '0' }
+				},
+				'float': {
+					'0%, 100%': { transform: 'translateY(0)' },
+					'50%': { transform: 'translateY(-10px)' }
+				},
+				'flow': {
+					'0%': { 'stroke-dashoffset': '1000' },
+					'100%': { 'stroke-dashoffset': '0' }
+				},
+				'rotate': {
+					'0%': { transform: 'rotate(0deg)' },
+					'100%': { transform: 'rotate(360deg)' }
+				},
+				'node-pulse': {
+					'0%, 100%': { opacity: '0.85', transform: 'scale(1)' },
+					'50%': { opacity: '1', transform: 'scale(1.05)' }
 				}
 			},
 			animation: {
 				'accordion-down': 'accordion-down 0.2s ease-out',
-				'accordion-up': 'accordion-up 0.2s ease-out'
+				'accordion-up': 'accordion-up 0.2s ease-out',
+				'pulse-ring': 'pulse-ring 1.5s cubic-bezier(0.215, 0.61, 0.355, 1) infinite',
+				'float': 'float 3s ease-in-out infinite',
+				'flow': 'flow 3s linear infinite',
+				'rotate': 'rotate 8s linear infinite',
+				'node-pulse': 'node-pulse 2s ease-in-out infinite'
 			}
 		}
 	},
