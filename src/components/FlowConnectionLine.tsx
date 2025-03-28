@@ -71,13 +71,15 @@ const FlowConnectionLine: React.FC<FlowConnectionLineProps> = ({
           }}
         />
       )}
-      <style jsx>{`
-        @keyframes flowingPath {
-          to {
-            stroke-dashoffset: -20;
+      <style>
+        {`
+          @keyframes flowingPath {
+            to {
+              stroke-dashoffset: -20;
+            }
           }
-        }
-      `}</style>
+        `}
+      </style>
     </svg>
   );
 };

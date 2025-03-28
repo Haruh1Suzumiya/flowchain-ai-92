@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useTheme } from 'next-themes';
 import Sidebar from '@/components/sidebar/Sidebar';
 import FlowWorkspace from '@/components/FlowWorkspace';
@@ -8,17 +8,27 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
-import { Switch } from "@/components/ui/switch"; // Add this import
+import { Switch } from "@/components/ui/switch";
 import { motion } from "framer-motion";
 import { Sun, Moon } from 'lucide-react';
 
 const Dashboard = () => {
   const [activeTab, setActiveTab] = useState('flowchart');
-  const { theme, setTheme } = useTheme();
+  const { theme, setTheme, resolvedTheme } = useTheme();
+
+  // Ensure theme is properly initialized
+  useEffect(() => {
+    // Force dark theme by default
+    if (!theme || theme === 'system') {
+      setTheme('dark');
+    }
+  }, [theme, setTheme]);
 
   const toggleTheme = () => {
-    setTheme(theme === 'dark' ? 'light' : 'dark');
+    setTheme(resolvedTheme === 'dark' ? 'light' : 'dark');
   };
+
+  const isDarkTheme = resolvedTheme === 'dark';
 
   return (
     <div className="h-screen flex overflow-hidden bg-flow-bg text-white">
@@ -41,7 +51,7 @@ const Dashboard = () => {
               onClick={toggleTheme}
               className="rounded-full h-8 w-8"
             >
-              {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
+              {isDarkTheme ? <Sun size={18} /> : <Moon size={18} />}
             </Button>
             <div className="w-8 h-8 rounded-full bg-flow-node-ai flex items-center justify-center">
               <span className="text-xs font-bold">3</span>
@@ -273,16 +283,16 @@ const Dashboard = () => {
                       <h3 className="font-medium mb-2">Theme</h3>
                       <div className="flex items-center space-x-4">
                         <Button 
-                          variant={theme === 'light' ? "default" : "outline"} 
-                          className={theme === 'light' ? "bg-flow-node-blockchain text-white" : "bg-flow-card/40 border-gray-700 text-white"}
+                          variant={isDarkTheme ? "outline" : "default"} 
+                          className={isDarkTheme ? "bg-flow-card/40 border-gray-700 text-white" : "bg-flow-node-blockchain text-white"}
                           onClick={() => setTheme('light')}
                         >
                           <Sun className="mr-2 h-4 w-4" />
                           Light Mode
                         </Button>
                         <Button 
-                          variant={theme === 'dark' ? "default" : "outline"} 
-                          className={theme === 'dark' ? "bg-flow-node-blockchain text-white" : "bg-flow-card/40 border-gray-700 text-white"}
+                          variant={isDarkTheme ? "default" : "outline"} 
+                          className={isDarkTheme ? "bg-flow-node-blockchain text-white" : "bg-flow-card/40 border-gray-700 text-white"}
                           onClick={() => setTheme('dark')}
                         >
                           <Moon className="mr-2 h-4 w-4" />
@@ -307,15 +317,15 @@ const Dashboard = () => {
                       <div className="space-y-2">
                         <div className="flex justify-between items-center">
                           <span>Enable AI suggestions</span>
-                          <Switch defaultChecked />
+                          <Switch defaultChecked id="ai-suggestions" />
                         </div>
                         <div className="flex justify-between items-center">
                           <span>Real-time analysis</span>
-                          <Switch defaultChecked />
+                          <Switch defaultChecked id="real-time-analysis" />
                         </div>
                         <div className="flex justify-between items-center">
                           <span>Share anonymous data to improve AI</span>
-                          <Switch />
+                          <Switch id="share-anonymous-data" />
                         </div>
                       </div>
                     </div>
@@ -327,11 +337,11 @@ const Dashboard = () => {
                       <div className="space-y-2">
                         <div className="flex justify-between items-center">
                           <span>Auto-detect network</span>
-                          <Switch defaultChecked />
+                          <Switch defaultChecked id="auto-detect-network" />
                         </div>
                         <div className="flex justify-between items-center">
                           <span>Testnet mode</span>
-                          <Switch />
+                          <Switch id="testnet-mode" />
                         </div>
                       </div>
                     </div>
