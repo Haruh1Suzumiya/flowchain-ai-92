@@ -1,14 +1,16 @@
-
 import React from 'react';
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useNavigate } from 'react-router-dom';
 import { useToast } from "@/hooks/use-toast";
+import { useTheme } from 'next-themes';
 
 const Sidebar: React.FC = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { resolvedTheme } = useTheme();
+  const isDark = resolvedTheme === 'dark';
   
   const menuItems = [
     { name: 'Dashboard', icon: 'dashboard' },
@@ -28,7 +30,7 @@ const Sidebar: React.FC = () => {
   };
   
   return (
-    <div className="h-full flex flex-col bg-flow-card/40 border-r border-gray-700">
+    <div className="h-full flex flex-col bg-card border-r border-input">
       <div className="p-4">
         <div className="flex items-center gap-2 mb-8">
           <div className="w-8 h-8 rounded-full bg-gradient-to-r from-flow-node-ai to-flow-node-blockchain flex items-center justify-center">
@@ -38,7 +40,7 @@ const Sidebar: React.FC = () => {
               <polyline points="18.55 5.11 22 12 18.55 18.89"></polyline>
             </svg>
           </div>
-          <span className="font-bold text-lg text-white">FlowChain AI</span>
+          <span className="font-bold text-lg">FlowChain AI</span>
         </div>
         
         <ScrollArea className="flex-1 h-[calc(100vh-13rem)]">
@@ -47,7 +49,7 @@ const Sidebar: React.FC = () => {
               <Button
                 key={index}
                 variant="ghost"
-                className="w-full justify-start text-gray-300 hover:text-white hover:bg-white/5"
+                className="w-full justify-start hover:bg-secondary/80"
               >
                 {getIcon(item.icon)}
                 <span>{item.name}</span>
@@ -58,19 +60,19 @@ const Sidebar: React.FC = () => {
       </div>
       
       <div className="mt-auto p-4">
-        <Separator className="my-4 bg-gray-700" />
+        <Separator className="my-4" />
         <div className="flex items-center mb-4">
           <div className="w-8 h-8 rounded-full bg-flow-node-ai flex items-center justify-center text-white font-semibold">
             U
           </div>
           <div className="ml-3">
-            <p className="text-sm font-medium text-white">User Name</p>
-            <p className="text-xs text-gray-400">user@example.com</p>
+            <p className="text-sm font-medium">User Name</p>
+            <p className="text-xs text-muted-foreground">user@example.com</p>
           </div>
         </div>
         <Button 
           variant="outline" 
-          className="w-full border-gray-700 text-gray-300 hover:bg-white/5 hover:text-white"
+          className="w-full"
           onClick={handleLogout}
         >
           <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2">
