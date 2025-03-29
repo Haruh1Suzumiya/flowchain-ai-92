@@ -46,3 +46,21 @@
 body, button, div, main, header, aside, section, nav {
   transition: background-color 300ms ease, color 300ms ease, border-color 300ms ease, box-shadow 300ms ease;
 }
+
+/* Light theme specific overrides */
+html.light .bg-flow-card {
+  background-color: rgba(240, 240, 245, 0.8);
+}
+
+html.light .bg-flow-bg {
+  background-color: #f5f5f7;
+}
+
+/* Improved drag cursor feedback */
+.dragging {
+  cursor: grabbing !important;
+}
+
+.grabbable {
+  cursor: grab;
+}

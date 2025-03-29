@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import FlowNode from './FlowNode';
@@ -12,6 +11,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Wallet, CheckCircle2, PlayCircle, Plus, Edit, Trash2, DollarSign, Settings, AlertTriangle } from 'lucide-react';
 import { Toggle } from "@/components/ui/toggle";
+import { useTheme } from 'next-themes';
 
 // Types for our flow nodes
 interface NodePosition {
@@ -201,6 +201,7 @@ const nodeTemplates: {[key: string]: Omit<NodeData, 'id' | 'position' | 'connect
 };
 
 const FlowWorkspace: React.FC = () => {
+  const { theme } = useTheme();
   const containerRef = useRef<HTMLDivElement>(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const [activeNodeId, setActiveNodeId] = useState<string | null>(null);
@@ -228,7 +229,6 @@ const FlowWorkspace: React.FC = () => {
 
   // Load flash loan example if needed
   useEffect(() => {
-    // Use flash loan example by default for better user experience
     setNodes(flashLoanArbitrageNodes);
   }, []);
 
@@ -247,7 +247,6 @@ const FlowWorkspace: React.FC = () => {
     }
   };
 
-  // Function to generate a unique ID
   const generateId = (prefix: string) => {
     return `${prefix}-${Math.random().toString(36).substring(2, 9)}`;
   };
@@ -260,7 +259,6 @@ const FlowWorkspace: React.FC = () => {
     
     const containerRect = containerRef.current.getBoundingClientRect();
     
-    // Calculate a position in the viewport
     const newNode: NodeData = {
       ...template,
       id: generateId(type),
@@ -294,13 +292,11 @@ const FlowWorkspace: React.FC = () => {
     
     const containerRect = containerRef.current.getBoundingClientRect();
     
-    // Calculate offset between mouse position and node position
     setDragOffset({
       x: e.clientX - (containerRect.left + node.position.x),
       y: e.clientY - (containerRect.top + node.position.y)
     });
     
-    // Add event listeners for mouse move and up
     document.addEventListener('mousemove', handleNodeDragMove);
     document.addEventListener('mouseup', handleNodeDragEnd);
   };
@@ -310,7 +306,6 @@ const FlowWorkspace: React.FC = () => {
     
     const containerRect = containerRef.current.getBoundingClientRect();
     
-    // Calculate new position within container bounds
     const newX = Math.max(50, Math.min(containerRect.width - 50, e.clientX - containerRect.left - dragOffset.x));
     const newY = Math.max(50, Math.min(containerRect.height - 50, e.clientY - containerRect.top - dragOffset.y));
     
@@ -322,7 +317,6 @@ const FlowWorkspace: React.FC = () => {
   const handleNodeDragEnd = useCallback(() => {
     setIsDraggingNode(false);
     
-    // Remove event listeners
     document.removeEventListener('mousemove', handleNodeDragMove);
     document.removeEventListener('mouseup', handleNodeDragEnd);
     
@@ -377,16 +371,14 @@ const FlowWorkspace: React.FC = () => {
     const mouseX = e.clientX - containerRect.left;
     const mouseY = e.clientY - containerRect.top;
     
-    // Find if we're over a node
     const targetNode = nodes.find(node => {
       const dx = mouseX - node.position.x;
       const dy = mouseY - node.position.y;
       const distance = Math.sqrt(dx * dx + dy * dy);
-      return distance < 50; // Within 50px radius of node center
+      return distance < 50;
     });
     
     if (targetNode && targetNode.id !== tempConnection.source) {
-      // Add connection
       setNodes(prev => prev.map(node => 
         node.id === tempConnection.source
           ? { ...node, connections: [...node.connections, targetNode.id] }
@@ -411,7 +403,6 @@ const FlowWorkspace: React.FC = () => {
   };
 
   const handleConnectWallet = () => {
-    // Simulate wallet connection
     const mockAddress = `0x${Math.random().toString(36).substring(2, 12)}...${Math.random().toString(36).substring(2, 6)}`;
     setWalletAddress(mockAddress);
     setWalletConnected(true);
@@ -427,22 +418,18 @@ const FlowWorkspace: React.FC = () => {
     setShowSignatureDialog(false);
     setIsProcessing(true);
     
-    // Reset all animations
     setNodes(prev => prev.map(node => ({
       ...node,
       isAnimated: false
     })));
     
-    // Animate each node in sequence
     const animateSequence = async () => {
       const nodesList = [...nodes];
       
-      // Initialize a queue with the first nodes (those with no incoming connections)
       const startNodes = nodesList.filter(node => 
         !nodesList.some(n => n.connections.includes(node.id))
       );
       
-      // If no starting nodes, use the first node as fallback
       const queue = startNodes.length > 0 ? [...startNodes] : [nodesList[0]]; 
       const processed = new Set<string>();
       
@@ -452,14 +439,12 @@ const FlowWorkspace: React.FC = () => {
         if (processed.has(currentNode.id)) continue;
         processed.add(currentNode.id);
         
-        // Animate this node
         setNodes(prev => prev.map(node => 
           node.id === currentNode.id ? { ...node, isAnimated: true } : node
         ));
         
         await new Promise(resolve => setTimeout(resolve, 800));
         
-        // Add all connected nodes to the queue
         const connectedNodes = nodesList.filter(node => 
           currentNode.connections.includes(node.id)
         );
@@ -467,7 +452,6 @@ const FlowWorkspace: React.FC = () => {
         queue.push(...connectedNodes);
       }
       
-      // Success message
       toast({
         title: "Process Complete",
         description: "All nodes have successfully processed data",
@@ -496,13 +480,11 @@ const FlowWorkspace: React.FC = () => {
   };
 
   const deleteNode = (nodeId: string) => {
-    // First remove any connections to this node
     setNodes(prev => prev.map(node => ({
       ...node,
       connections: node.connections.filter(id => id !== nodeId)
     })));
     
-    // Then remove the node itself
     setNodes(prev => prev.filter(node => node.id !== nodeId));
     
     setNodeToDelete(null);
@@ -547,9 +529,7 @@ const FlowWorkspace: React.FC = () => {
     setIsFlowGenerating(true);
     setIsValidated(false);
     
-    // Simulate AI flow generation with a delay
     setTimeout(() => {
-      // Replace current nodes with flash loan example nodes
       setNodes(flashLoanArbitrageNodes);
       
       toast({
@@ -594,13 +574,13 @@ const FlowWorkspace: React.FC = () => {
   return (
     <div className="h-full relative flex flex-col" ref={containerRef}>
       <div className="absolute top-4 right-4 z-10 flex flex-wrap gap-3 items-center">
-        <div className="flex items-center space-x-2 bg-flow-card/40 p-2 rounded-md">
-          <span className="text-sm text-white">Manual</span>
+        <div className="flex items-center space-x-2 bg-flow-card/40 dark:bg-flow-card/40 p-2 rounded-md">
+          <span className="text-sm text-foreground dark:text-white">Manual</span>
           <Switch 
             checked={workspaceMode === 'ai'}
             onCheckedChange={toggleWorkspaceMode}
           />
-          <span className="text-sm text-white">AI</span>
+          <span className="text-sm text-foreground dark:text-white">AI</span>
         </div>
         
         <div className="flex flex-wrap gap-2">
@@ -609,23 +589,23 @@ const FlowWorkspace: React.FC = () => {
               <div className="relative">
                 <Button 
                   variant="outline" 
-                  className="bg-flow-card border-gray-700 text-white hover:bg-flow-card/90"
+                  className="bg-flow-card dark:bg-flow-card border-gray-400 dark:border-gray-700 text-foreground dark:text-white hover:bg-flow-card/90 dark:hover:bg-flow-card/90"
                   onClick={() => setSelectedTemplate('menu')}
                 >
                   Templates
                 </Button>
                 
                 {selectedTemplate === 'menu' && (
-                  <div className="absolute top-full left-0 mt-1 bg-flow-card border border-gray-700 rounded-md shadow-lg z-50 w-48">
+                  <div className="absolute top-full left-0 mt-1 bg-card dark:bg-flow-card border border-gray-400 dark:border-gray-700 rounded-md shadow-lg z-50 w-48">
                     <div className="p-1">
                       <button
-                        className="w-full text-left px-3 py-2 text-sm hover:bg-flow-card/90 rounded"
+                        className="w-full text-left px-3 py-2 text-sm hover:bg-muted dark:hover:bg-flow-card/90 rounded"
                         onClick={() => loadTemplate('flashLoan')}
                       >
                         Flash Loan Arbitrage
                       </button>
                       <button
-                        className="w-full text-left px-3 py-2 text-sm hover:bg-flow-card/90 rounded"
+                        className="w-full text-left px-3 py-2 text-sm hover:bg-muted dark:hover:bg-flow-card/90 rounded"
                         onClick={() => loadTemplate('default')}
                       >
                         Basic Workflow
@@ -638,7 +618,7 @@ const FlowWorkspace: React.FC = () => {
               <div className="relative">
                 <Button 
                   variant="outline" 
-                  className="bg-flow-card border-gray-700 text-white hover:bg-flow-card/90"
+                  className="bg-flow-card dark:bg-flow-card border-gray-400 dark:border-gray-700 text-foreground dark:text-white hover:bg-flow-card/90 dark:hover:bg-flow-card/90"
                   onClick={() => setIsAddingNode(!isAddingNode)}
                 >
                   <Plus className="mr-2 h-4 w-4" />
@@ -646,12 +626,12 @@ const FlowWorkspace: React.FC = () => {
                 </Button>
                 
                 {isAddingNode && (
-                  <div className="absolute top-full left-0 mt-1 bg-flow-card border border-gray-700 rounded-md shadow-lg z-50 w-48">
+                  <div className="absolute top-full left-0 mt-1 bg-card dark:bg-flow-card border border-gray-400 dark:border-gray-700 rounded-md shadow-lg z-50 w-48">
                     <div className="p-1">
                       {Object.keys(nodeTemplates).map((type) => (
                         <button
                           key={type}
-                          className="w-full text-left px-3 py-2 text-sm hover:bg-flow-card/90 rounded"
+                          className="w-full text-left px-3 py-2 text-sm hover:bg-muted dark:hover:bg-flow-card/90 rounded"
                           onClick={() => {
                             handleAddNode(type);
                             setIsAddingNode(false);
@@ -712,7 +692,7 @@ const FlowWorkspace: React.FC = () => {
           {walletConnected && (
             <Button 
               variant="outline" 
-              className="bg-flow-card border-gray-700 text-white hover:bg-flow-card/90"
+              className="bg-flow-card dark:bg-flow-card border-gray-400 dark:border-gray-700 text-foreground dark:text-white hover:bg-flow-card/90 dark:hover:bg-flow-card/90"
               onClick={() => {}}
             >
               <Wallet className="mr-2 h-4 w-4" />
@@ -722,18 +702,17 @@ const FlowWorkspace: React.FC = () => {
         </div>
       </div>
       
-      {/* AI Mode Prompt Input */}
       {workspaceMode === 'ai' && (
         <div className="absolute top-16 left-4 right-4 z-10">
-          <div className="bg-flow-card/40 p-4 rounded-md border border-gray-700">
+          <div className="bg-background/40 dark:bg-flow-card/40 p-4 rounded-md border border-gray-400 dark:border-gray-700">
             <div className="flex flex-col space-y-2">
-              <label className="text-sm text-white">Enter your workflow description:</label>
+              <label className="text-sm text-foreground dark:text-white">Enter your workflow description:</label>
               <div className="flex space-x-2">
                 <Textarea 
                   placeholder="Describe what you want the AI to create... (e.g., Create a workflow that connects Ethereum to Aave for flash loans, swaps tokens on Uniswap, and returns profit)"
                   value={naturalLanguagePrompt}
                   onChange={(e) => setNaturalLanguagePrompt(e.target.value)}
-                  className="bg-flow-bg text-white border-gray-700 focus-visible:ring-flow-node-ai"
+                  className="bg-background dark:bg-flow-bg text-foreground dark:text-white border-gray-400 dark:border-gray-700 focus-visible:ring-flow-node-ai"
                   rows={2}
                 />
                 <Button 
@@ -748,12 +727,11 @@ const FlowWorkspace: React.FC = () => {
         </div>
       )}
       
-      {/* Node Detail Panel */}
       {showNodeDetailPanel && editingNode && (
         <div className="absolute top-16 left-4 z-10 w-80">
-          <div className="bg-flow-card/90 p-4 rounded-md border border-gray-700">
+          <div className="bg-card/90 dark:bg-flow-card/90 p-4 rounded-md border border-gray-400 dark:border-gray-700">
             <div className="flex justify-between items-center mb-3">
-              <h3 className="font-medium">Node Details</h3>
+              <h3 className="font-medium text-foreground dark:text-white">Node Details</h3>
               <div className="flex space-x-2">
                 <Button 
                   variant="ghost" 
@@ -784,7 +762,7 @@ const FlowWorkspace: React.FC = () => {
                   id="node-label"
                   value={editingNode.label}
                   onChange={(e) => setEditingNode({...editingNode, label: e.target.value})}
-                  className="bg-flow-bg text-white border-gray-700"
+                  className="bg-background dark:bg-flow-bg text-foreground dark:text-white border-gray-400 dark:border-gray-700"
                 />
               </div>
               
@@ -794,7 +772,7 @@ const FlowWorkspace: React.FC = () => {
                   id="node-description"
                   value={editingNode.description}
                   onChange={(e) => setEditingNode({...editingNode, description: e.target.value})}
-                  className="bg-flow-bg text-white border-gray-700"
+                  className="bg-background dark:bg-flow-bg text-foreground dark:text-white border-gray-400 dark:border-gray-700"
                 />
               </div>
               
@@ -805,7 +783,7 @@ const FlowWorkspace: React.FC = () => {
                     id="node-protocol"
                     value={editingNode.protocol}
                     onChange={(e) => setEditingNode({...editingNode, protocol: e.target.value})}
-                    className="bg-flow-bg text-white border-gray-700"
+                    className="bg-background dark:bg-flow-bg text-foreground dark:text-white border-gray-400 dark:border-gray-700"
                   />
                 </div>
               )}
@@ -817,7 +795,7 @@ const FlowWorkspace: React.FC = () => {
                     id="node-action"
                     value={editingNode.action}
                     onChange={(e) => setEditingNode({...editingNode, action: e.target.value})}
-                    className="bg-flow-bg text-white border-gray-700"
+                    className="bg-background dark:bg-flow-bg text-foreground dark:text-white border-gray-400 dark:border-gray-700"
                   />
                 </div>
               )}
@@ -829,7 +807,7 @@ const FlowWorkspace: React.FC = () => {
                     id="node-token"
                     value={editingNode.token}
                     onChange={(e) => setEditingNode({...editingNode, token: e.target.value})}
-                    className="bg-flow-bg text-white border-gray-700"
+                    className="bg-background dark:bg-flow-bg text-foreground dark:text-white border-gray-400 dark:border-gray-700"
                   />
                 </div>
               )}
@@ -847,18 +825,18 @@ const FlowWorkspace: React.FC = () => {
         </div>
       )}
       
-      {/* Background grid */}
-      <div className="absolute inset-0 bg-flow-bg">
+      <div className="absolute inset-0 bg-flow-bg dark:bg-flow-bg">
         <div className="w-full h-full" 
              style={{
-               backgroundImage: 'radial-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 0)',
+               backgroundImage: theme === 'dark' 
+                 ? 'radial-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 0)'
+                 : 'radial-gradient(rgba(0, 0, 0, 0.1) 1px, transparent 0)',
                backgroundSize: '30px 30px',
                backgroundPosition: '-15px -15px',
              }}
         ></div>
       </div>
       
-      {/* Connections between nodes */}
       <div className="absolute inset-0 pointer-events-none">
         {nodes.map(node => 
           node.connections.map(targetId => {
@@ -871,10 +849,10 @@ const FlowWorkspace: React.FC = () => {
                   end={targetNode.position}
                   animated={isProcessing}
                   color={
-                    node.type === 'blockchain' ? 'rgba(6, 182, 212, 0.5)' : 
-                    node.type === 'defi' ? 'rgba(16, 185, 129, 0.5)' :
-                    node.type === 'ai' ? 'rgba(139, 92, 246, 0.5)' : 
-                    'rgba(59, 130, 246, 0.5)'
+                    node.type === 'blockchain' ? 'rgba(6, 182, 212, 0.6)' : 
+                    node.type === 'defi' ? 'rgba(16, 185, 129, 0.6)' :
+                    node.type === 'ai' ? 'rgba(139, 92, 246, 0.6)' : 
+                    'rgba(59, 130, 246, 0.6)'
                   }
                 />
               );
@@ -883,18 +861,16 @@ const FlowWorkspace: React.FC = () => {
           })
         )}
         
-        {/* Temporary connection line when dragging */}
         {tempConnection && (
           <FlowConnectionLine
             start={nodes.find(n => n.id === tempConnection.source)?.position || {x: 0, y: 0}}
             end={tempConnection.target}
             dashed={true}
-            color="rgba(255, 255, 255, 0.3)"
+            color={theme === 'dark' ? "rgba(255, 255, 255, 0.3)" : "rgba(0, 0, 0, 0.3)"}
           />
         )}
       </div>
       
-      {/* Nodes */}
       <div className="relative h-full w-full mt-28">
         {nodes.map(node => (
           <motion.div
@@ -908,7 +884,7 @@ const FlowWorkspace: React.FC = () => {
               top: node.position.y, 
               transform: 'translate(-50%, -50%)',
               zIndex: node.id === activeNodeId ? 10 : 1,
-              cursor: 'move'
+              cursor: isDraggingNode && node.id === activeNodeId ? 'grabbing' : 'grab'
             }}
             onMouseDown={(e) => handleNodeDragStart(e, node.id)}
           >
@@ -956,9 +932,8 @@ const FlowWorkspace: React.FC = () => {
                 }
               />
               
-              {/* Connection handle */}
               <div 
-                className="absolute right-0 bottom-0 w-5 h-5 bg-flow-card rounded-full border border-gray-700 flex items-center justify-center cursor-pointer z-20 transform translate-x-1/2 translate-y-1/2"
+                className="absolute right-0 bottom-0 w-5 h-5 bg-card dark:bg-flow-card rounded-full border border-gray-400 dark:border-gray-700 flex items-center justify-center cursor-pointer z-20 transform translate-x-1/2 translate-y-1/2"
                 onMouseDown={(e) => {
                   e.stopPropagation(); // Prevent node drag
                   startConnectionDrag(node.id, e);
@@ -975,12 +950,11 @@ const FlowWorkspace: React.FC = () => {
         ))}
       </div>
 
-      {/* Wallet Connection Dialog */}
       <Dialog open={showWalletDialog} onOpenChange={setShowWalletDialog}>
-        <DialogContent className="bg-flow-card text-white border-flow-node-blockchain/30 max-w-md">
+        <DialogContent className="bg-card dark:bg-flow-card text-foreground dark:text-white border-muted dark:border-flow-node-blockchain/30 max-w-md">
           <DialogHeader>
             <DialogTitle className="text-lg">Connect Wallet</DialogTitle>
-            <DialogDescription className="text-gray-400">
+            <DialogDescription className="text-muted-foreground dark:text-gray-400">
               Connect your wallet to create and execute workflows
             </DialogDescription>
           </DialogHeader>
@@ -997,7 +971,7 @@ const FlowWorkspace: React.FC = () => {
             <Button 
               variant="outline" 
               onClick={() => setShowWalletDialog(false)} 
-              className="border-gray-700 hover:bg-flow-card/90"
+              className="border-gray-400 dark:border-gray-700 hover:bg-muted dark:hover:bg-flow-card/90"
             >
               Skip for Now
             </Button>
@@ -1005,9 +979,8 @@ const FlowWorkspace: React.FC = () => {
         </DialogContent>
       </Dialog>
 
-      {/* Signature Request Dialog */}
       <Dialog open={showSignatureDialog} onOpenChange={setShowSignatureDialog}>
-        <DialogContent className="bg-flow-card text-white border-flow-node-blockchain/30 max-w-md">
+        <DialogContent className="bg-card dark:bg-flow-card text-foreground dark:text-white border-muted dark:border-flow-node-blockchain/30 max-w-md">
           <DialogHeader>
             <DialogTitle className="text-lg">Signature Request</DialogTitle>
             <DialogDescription className="text-gray-400">
@@ -1037,9 +1010,8 @@ const FlowWorkspace: React.FC = () => {
         </DialogContent>
       </Dialog>
 
-      {/* Delete Confirmation Dialog */}
       <Dialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
-        <DialogContent className="bg-flow-card text-white border-red-500/30 max-w-sm">
+        <DialogContent className="bg-card dark:bg-flow-card text-foreground dark:text-white border-red-500/30 max-w-sm">
           <DialogHeader>
             <DialogTitle className="text-lg">Delete Node</DialogTitle>
             <DialogDescription className="text-gray-400">
