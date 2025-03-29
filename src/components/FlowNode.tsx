@@ -1,6 +1,7 @@
 
 import React from 'react';
 import { cn } from '@/lib/utils';
+import { useTheme } from 'next-themes';
 
 export type NodeType = 'blockchain' | 'ai' | 'default' | 'defi';
 
@@ -25,11 +26,14 @@ const FlowNode: React.FC<FlowNodeProps> = ({
   onClick,
   className
 }) => {
+  const { resolvedTheme } = useTheme();
+  const isDark = resolvedTheme === 'dark';
+  
   const nodeColorClass = {
-    blockchain: 'bg-flow-node-blockchain text-white border-flow-node-blockchain/30',
-    ai: 'bg-flow-node-ai text-white border-flow-node-ai/30',
-    defi: 'bg-emerald-500 text-white border-emerald-500/30',
-    default: 'bg-flow-node-default text-white border-flow-node-default/30'
+    blockchain: `bg-flow-node-blockchain text-white border-flow-node-blockchain/30`,
+    ai: `bg-flow-node-ai text-white border-flow-node-ai/30`,
+    defi: `bg-emerald-500 text-white border-emerald-500/30`,
+    default: `bg-flow-node-default text-white border-flow-node-default/30`
   };
   
   const animationClass = isAnimated ? `node-animation-pulse ${type}-node` : '';

@@ -1,4 +1,3 @@
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -44,9 +43,9 @@
     --sidebar-border: 220 13% 91%;
     --sidebar-ring: 217.2 91.2% 59.8%;
     
-    /* Flow specific colors */
-    --flow-bg: 222.2 47.4% 11.2%;
-    --flow-card: 215 28% 17%;
+    /* Flow specific colors - light theme */
+    --flow-bg: 220 16% 96%;
+    --flow-card: 220 14% 90%;
     --flow-node-blockchain: 199 89% 48%;
     --flow-node-ai: 270 76% 66%;
     --flow-node-default: 217 91% 60%;
@@ -91,7 +90,7 @@
     --sidebar-border: 240 3.7% 15.9%;
     --sidebar-ring: 217.2 91.2% 59.8%;
     
-    /* Flow specific colors */
+    /* Flow specific colors - dark theme */
     --flow-bg: 222.2 84% 4.9%;
     --flow-card: 215 28% 17%;
     --flow-node-blockchain: 199 89% 48%;
@@ -107,7 +106,16 @@
   }
 
   body {
-    @apply bg-flow-bg text-foreground;
+    @apply bg-background text-foreground transition-colors duration-300;
+  }
+  
+  /* Ensure proper theme class is applied */
+  html.light {
+    color-scheme: light;
+  }
+
+  html.dark {
+    color-scheme: dark;
   }
 }
 
