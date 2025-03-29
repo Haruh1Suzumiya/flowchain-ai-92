@@ -198,8 +198,3 @@ html.light {
 html.dark {
   color-scheme: dark;
 }
-
-/* Theme transition */
-body, button, div, main, header, aside, section, nav {
-  transition: background-color 300ms ease, color 300ms ease, border-color 300ms ease, box-shadow 300ms ease;
-}

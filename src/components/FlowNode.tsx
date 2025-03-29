@@ -3,108 +3,59 @@ import React from 'react';
 import { cn } from '@/lib/utils';
 import { useTheme } from 'next-themes';
 
+export type NodeType = 'blockchain' | 'ai' | 'default' | 'defi';
+
 interface FlowNodeProps {
-  type: 'blockchain' | 'defi' | 'ai' | 'default';
+  type: NodeType;
+  icon: React.ReactNode;
   label: string;
-  description: string;
-  isAnimated: boolean;
-  isActive: boolean;
-  onClick: () => void;
+  description?: string;
+  isAnimated?: boolean;
+  isActive?: boolean;
+  onClick?: () => void;
   className?: string;
-  icon?: React.ReactNode;
 }
 
 const FlowNode: React.FC<FlowNodeProps> = ({
   type,
+  icon,
   label,
   description,
-  isAnimated,
-  isActive,
+  isAnimated = false,
+  isActive = false,
   onClick,
-  className,
-  icon
+  className
 }) => {
   const { resolvedTheme } = useTheme();
   const isDark = resolvedTheme === 'dark';
-
-  // Different background colors based on node type
-  const getBgColor = () => {
-    if (isDark) {
-      // Dark theme colors
-      if (type === 'blockchain') return 'bg-gradient-to-br from-cyan-900 to-cyan-950';
-      if (type === 'defi') return 'bg-gradient-to-br from-emerald-900 to-emerald-950';
-      if (type === 'ai') return 'bg-gradient-to-br from-purple-900 to-purple-950';
-      return 'bg-gradient-to-br from-blue-900 to-blue-950';
-    } else {
-      // Light theme colors
-      if (type === 'blockchain') return 'bg-gradient-to-br from-cyan-500 to-cyan-600';
-      if (type === 'defi') return 'bg-gradient-to-br from-emerald-500 to-emerald-600';
-      if (type === 'ai') return 'bg-gradient-to-br from-purple-500 to-purple-600';
-      return 'bg-gradient-to-br from-blue-500 to-blue-600';
-    }
+  
+  const nodeColorClass = {
+    blockchain: `bg-flow-node-blockchain text-white border-flow-node-blockchain/30`,
+    ai: `bg-flow-node-ai text-white border-flow-node-ai/30`,
+    defi: `bg-emerald-500 text-white border-emerald-500/30`,
+    default: `bg-flow-node-default text-white border-flow-node-default/30`
   };
-
-  // Border color based on node type
-  const getBorderColor = () => {
-    if (isDark) {
-      // Dark theme colors
-      if (type === 'blockchain') return 'border-cyan-700';
-      if (type === 'defi') return 'border-emerald-700';
-      if (type === 'ai') return 'border-purple-700';
-      return 'border-blue-700';
-    } else {
-      // Light theme colors
-      if (type === 'blockchain') return 'border-cyan-400';
-      if (type === 'defi') return 'border-emerald-400';
-      if (type === 'ai') return 'border-purple-400';
-      return 'border-blue-400';
-    }
-  };
-
-  // Get animation class based on node type
-  const getAnimationClass = () => {
-    if (!isAnimated) return '';
-    
-    if (type === 'blockchain') return 'blockchain-node node-animation-pulse';
-    if (type === 'defi') return 'defi-node node-animation-pulse';
-    if (type === 'ai') return 'ai-node node-animation-pulse';
-    return 'default-node node-animation-pulse';
-  };
-
-  // Active state styling
-  const getActiveClass = () => {
-    if (!isActive) return '';
-    
-    if (isDark) {
-      if (type === 'blockchain') return 'ring-2 ring-cyan-400 shadow-lg shadow-cyan-900/50';
-      if (type === 'defi') return 'ring-2 ring-emerald-400 shadow-lg shadow-emerald-900/50';
-      if (type === 'ai') return 'ring-2 ring-purple-400 shadow-lg shadow-purple-900/50';
-      return 'ring-2 ring-blue-400 shadow-lg shadow-blue-900/50';
-    } else {
-      if (type === 'blockchain') return 'ring-2 ring-cyan-300 shadow-lg shadow-cyan-300/50';
-      if (type === 'defi') return 'ring-2 ring-emerald-300 shadow-lg shadow-emerald-300/50';
-      if (type === 'ai') return 'ring-2 ring-purple-300 shadow-lg shadow-purple-300/50';
-      return 'ring-2 ring-blue-300 shadow-lg shadow-blue-300/50';
-    }
-  };
-
+  
+  const animationClass = isAnimated ? `node-animation-pulse ${type}-node` : '';
+  const activeClass = isActive ? 'ring-2 ring-white ring-opacity-50' : '';
+  
   return (
-    <div
+    <div 
       className={cn(
-        "relative p-4 rounded-lg border transition-all duration-200 text-white overflow-visible",
-        getBgColor(),
-        getBorderColor(),
-        getActiveClass(),
-        getAnimationClass(),
-        className
+        'relative p-4 rounded-lg bg-opacity-20 border cursor-pointer transition-all duration-300 hover:bg-opacity-30 flex flex-col items-center text-center',
+        nodeColorClass[type],
+        animationClass,
+        activeClass,
+        className,
+        isAnimated && 'animate-node-pulse'
       )}
       onClick={onClick}
     >
-      <div className="flex flex-col items-center space-y-2">
-        {icon && <div className="text-white">{icon}</div>}
-        <div className="font-medium">{label}</div>
-        <div className="text-sm opacity-90">{description}</div>
+      <div className="mb-2">
+        {icon}
       </div>
+      <h3 className="font-medium mb-1">{label}</h3>
+      {description && <p className="text-xs opacity-80">{description}</p>}
     </div>
   );
 };
